@@ -1,0 +1,6 @@
+.vertx
+*.iml
+logs
+target
+.gitignore
+.idea/
