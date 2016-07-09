@@ -1,0 +1,147 @@
+<html>
+<head>
+<meta charset="utf-8">
+<title>SockJS Chat Test</title>
+<script src="http://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+<script src="http://cdnjs.cloudflare.com/ajax/libs/sockjs-client/0.3.4/sockjs.min.js"></script>
+<script src="http://localhost/vertxbus-2.1.js"></script>
+<script type="text/javascript">
+	var eb = null;
+	var username = null;
+	var subscribed = false;
+	var handler = function(msg, replyTo) {
+		console.log('message', msg);
+		$('#message-box').append(msg.username+': '+msg.message+'\n');
+	};
+	
+	$(document).ready(function() {
+		open();
+		$('#subscribe-btn').click(function() {
+			subscribe($('#adress').val());
+		});
+		$('#desubscribe-btn').click(function() {
+			desubscribe($('#adress').val());
+		});
+		$('#send-btn').click(function() {
+			publish($('#adress').val(), $('#message').val());
+		});
+		$('#message').keypress(function(e) {
+			if (e.which == 13) {
+				publish($('#adress').val(), $('#message').val());
+			}
+		});
+	});
+	
+	function open() {
+		if (!eb) {
+			eb = new vertx.EventBus('http://localhost/mySockJS');
+			
+			eb.onopen = function() {
+				console.log('open');
+				$('#status-label').html('Status: connected');
+			};
+			eb.onclose = function() {
+				console.log('close');
+				$('#status-label').html('Status: Not connected');
+			};
+		}
+	}
+	
+	function close() {
+		if (eb) {
+			eb.close();
+		}
+	}
+	
+	function login() {
+		var id = $('#id').val()
+		var passwd = $('#passwd').val();
+		if (eb && id.length>0 && passwd.length>0) {
+			eb.login(id, passwd, function(reply) {
+				console.log(reply);
+				if (reply.status == 'ok') {
+					loginOk(id);
+				}
+				else {
+					alert('로그인 실패!');
+				}
+			});
+		}
+	}
+	
+	function subscribe(address) {
+		if (eb && eb.sessionID && !subscribed) {
+			eb.registerHandler(address, handler);
+			subscribed = true;
+			$('#status-label').html($('#status-label').html()+', Subscribe: '+address);
+		}
+	}
+	
+	function desubscribe(address) {
+		if (eb && subscribed) {
+			eb.unregisterHandler(address, handler);
+			subscribed = false;
+			$('#status-label').html('Status: connected');
+		}
+	}
+	
+	function publish(address, message) {
+		$('#message').val('');
+		$('#message').focus();
+		
+		if (!eb.sessionID) {
+			alert('로그인이 필요합니다.!');
+			$('#id').focus();
+			return;
+		}
+		if (!subscribed) {
+			alert('Subscribed이 필요합니다.!');
+			return;
+		}
+		if (eb && message.length>0) {
+			var data = {};
+			data.username = username;
+			data.message = message;
+			eb.publish(address, data);
+		}
+	}
+	
+	function loginOk(id) {
+		username = id;
+		var html = id+'님 안녕하세요!! ';
+		html += '<input type="button" id="logout-btn" value="Logout" onclick="logout();">';
+		$('#login-area').html(html);
+	} 
+	
+	function logout() {
+		if (eb) {
+			desubscribe($('#adress').val());
+			eb.send('vertx.basicauthmanager.logout', {sessionID: eb.sessionID}, function(reply) {
+				if (reply.status === 'ok') {
+					 delete eb.sessionID;
+					 var html = '<label>ID: </label><input type="text" id="id" value="" size="15"><label>&nbsp;PASSWD: </label><input type="password" id="passwd" value="" size="15">';
+					html += '<input type="button" id="login-btn" value="Login" onclick="login();">';
+					$('#login-area').html(html);
+				}
+			});
+		}
+	}
+</script>
+</head>
+<body>
+	<div id="status-label">Status: Not connected</div>
+	<hr/>
+	<div id="login-area">
+		<label>ID: </label><input type="text" id="id" value="" size="15"><label>&nbsp;PASSWD: </label><input type="password" id="passwd" value="" size="15">
+		<input type="button" id="login-btn" value="Login" onclick="login();">
+	</div>
+	<hr/>
+	<label>Address: </label><input type="text" id="adress" value="com.devop.vertx.ch5.room">
+	<input type="button" id="subscribe-btn" value="Subscribe">
+	<input type="button" id="desubscribe-btn" value="Desubscribe">
+	<hr/>
+	<textarea id="message-box" rows="20" cols="55"></textarea><br/>
+	<label>Message: </label><input type="text" id="message" value="" size="40">
+	<input type="button" id="send-btn" value="Send">
+</body>
+</html>

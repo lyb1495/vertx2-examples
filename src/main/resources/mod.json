@@ -1,0 +1,34 @@
+{
+ 	// chapter 1. examples
+	"main":"com.github.iyboklee.ch1.HelloVerticle",
+	
+	// chapter 2. examples
+	//"main":"com.github.iyboklee.ch2.TCPServerVerticle",
+	//"main":"com.github.iyboklee.ch2.TCPChatServerVerticle",
+	//"main":"com.github.iyboklee.ch2.TCPChatWithEbServerVerticle",
+	//"main":"com.github.iyboklee.ch2.TCPChatWithFramingServerVerticle",
+	
+	// chapter 3. examples
+	//"main":"com.github.iyboklee.ch3.HTTPServerVerticle",
+	//"main":"com.github.iyboklee.ch3.SockJSServerVerticle",
+	//"main":"com.github.iyboklee.ch3.SockJSEbbChatServerVerticle",
+	//"main":"com.github.iyboklee.ch3.SockJSEbbChatWithLoginServerStarterVerticle",
+	
+	// chapter 4. examples
+	//"main":"com.github.iyboklee.ch4.IntegratedChatServerStarterVerticle",
+	//"main":"com.github.iyboklee.ch4.mods.HTTPAuthMgrClientVerticle",
+	//"main":"com.github.iyboklee.ch4.mods.HTTPMongoPersistorClientVerticle",
+	//"main":"com.github.iyboklee.ch4.mods.HTTPMySQLPersistorClientVerticle",
+	//"main":"com.github.iyboklee.ch4.mods.HTTPMailerClientVerticle",
+
+	// chapter 5. examples
+	//"main":"com.github.iyboklee.ch5.tcplogin.TCPChatWithLoginServerVerticle",
+	//"main":"com.github.iyboklee.ch5.IntegratedChatWithLoginServerStarterVerticle",
+	//"main":"com.github.iyboklee.ch5.room.IntegratedChatWithRoomServerStarterVerticle",
+	//"main":"com.github.iyboklee.ch5.whisper.IntegratedChatWithWhisperServerStarterVerticle",
+	//"main":"com.github.iyboklee.ch5.persistor.IntegratedChatWithPersistorServerStarterVerticle",
+	
+	"description":"vert.x2 samples",
+	"author": "iyboklee",
+	"auto-redeploy": true
+}

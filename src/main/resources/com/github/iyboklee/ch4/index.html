@@ -1,0 +1,96 @@
+<html>
+<head>
+<meta charset="utf-8">
+<title>SockJS Chat Test</title>
+<script src="http://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+<script src="http://cdnjs.cloudflare.com/ajax/libs/sockjs-client/0.3.4/sockjs.min.js"></script>
+<script src="http://localhost/vertxbus-2.1.js"></script>
+<script type="text/javascript">
+  var eb = null;
+  var subscribed = false;
+  var handler = function(msg, replyTo) {
+    console.log('message', msg);
+    $('#message-box').append(msg+'\n');
+  };
+  
+  $(document).ready(function() {
+    open();
+    $('#subscribe-btn').click(function() {
+    	subscribe($('#adress').val());
+    });
+    $('#desubscribe-btn').click(function() {
+    	desubscribe($('#adress').val());
+    });
+    $('#send-btn').click(function() {
+    	publish($('#adress').val(), $('#message').val());
+    });
+    $('#message').keypress(function(e) {
+      if (e.which == 13) {
+    	  publish($('#adress').val(), $('#message').val());
+      }
+    });
+  });
+  
+  function open() {
+    if (!eb) {
+      eb = new vertx.EventBus('http://localhost/mySockJS');
+      
+      eb.onopen = function() {
+        console.log('open');
+        $('#status-label').html('Status: connected');
+      };
+      eb.onclose = function() {
+        console.log('close');
+        $('#status-label').html('Status: Not connected');
+      };
+    }
+  }
+  
+  function close() {
+    if (eb) {
+      eb.close();
+    }
+  }
+  
+  function subscribe(address) {
+    if (eb && !subscribed) {
+      eb.registerHandler(address, handler);
+      subscribed = true;
+      $('#status-label').html($('#status-label').html()+', Subscribe: '+address);
+    }
+  }
+  
+  function desubscribe(address) {
+    if (eb && subscribed) {
+      eb.unregisterHandler(address, handler);
+      subscribed = false;
+      $('#status-label').html('Status: connected');
+    }
+  }
+  
+  function publish(address, message) {
+	$('#message').val('');
+	$('#message').focus();
+	
+	if (!subscribed) {
+	  alert('Subscribed이 필요합니다.!');
+	  return;
+	}
+	if (eb && message.length>0) {
+	  eb.publish(address, message);
+	}
+  }
+</script>
+</head>
+<body>
+  <div id="status-label">Status: Not connected</div>
+  <hr/>
+  <label>Address: </label><input type="text" id="adress" value="com.devop.vertx.ch4">
+  <input type="button" id="subscribe-btn" value="Subscribe">
+  <input type="button" id="desubscribe-btn" value="Desubscribe">
+  <hr/>
+  <textarea id="message-box" rows="20" cols="55"></textarea><br/>
+  <label>Message: </label><input type="text" id="message" value="" size="40">
+  <input type="button" id="send-btn" value="Send">
+</body>
+</html>
